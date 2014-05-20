@@ -34,4 +34,9 @@ public class BrouwerServiceImpl implements BrouwerService {
 	public Iterable<Brouwer> opAlfabet(char letter) {
 		return brouwerDAO.opAlfabet(letter);
 	}
+
+	@Override
+	public long findAantalBrouwers() {
+		return brouwerDAO.findAantalBrouwers();
+	}
 }

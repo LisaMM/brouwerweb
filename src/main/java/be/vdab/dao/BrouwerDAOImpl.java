@@ -60,4 +60,9 @@ class BrouwerDAOImpl implements BrouwerDAO {
 		}
 		return brouwersMetLetter;
 	}
+
+	@Override
+	public long findAantalBrouwers() {
+		return brouwers.size();
+	}
 }

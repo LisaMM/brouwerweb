@@ -7,4 +7,5 @@ public interface BrouwerDAO {
 	Iterable<Brouwer> findAll();
 	Iterable<Brouwer> findByNaam(String beginNaam);
 	Iterable<Brouwer> opAlfabet(char letter);
+	long findAantalBrouwers();
 }
