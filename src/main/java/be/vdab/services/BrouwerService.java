@@ -6,4 +6,5 @@ public interface BrouwerService {
 	void create(Brouwer brouwer);
 	Iterable<Brouwer> findAll();
 	Iterable<Brouwer> findByNaam(String beginNaam);
+	Iterable<Brouwer> opAlfabet(char letter);
 }

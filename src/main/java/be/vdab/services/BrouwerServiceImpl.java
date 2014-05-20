@@ -29,4 +29,9 @@ public class BrouwerServiceImpl implements BrouwerService {
 	public Iterable<Brouwer> findByNaam(String beginNaam) {
 		return brouwerDAO.findByNaam(beginNaam);
 	}
+
+	@Override
+	public Iterable<Brouwer> opAlfabet(char letter) {
+		return brouwerDAO.opAlfabet(letter);
+	}
 }

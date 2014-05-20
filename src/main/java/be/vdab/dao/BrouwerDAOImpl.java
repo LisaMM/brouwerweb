@@ -49,4 +49,15 @@ class BrouwerDAOImpl implements BrouwerDAO {
 		}
 		return brouwersMetNaam;
 	}
+
+	@Override
+	public Iterable<Brouwer> opAlfabet(char letter) {
+		List<Brouwer> brouwersMetLetter = new ArrayList<>();
+		for (Brouwer brouwer : brouwers.values()) {
+			if (brouwer.getNaam().charAt(0) == letter) {
+				brouwersMetLetter.add(brouwer);
+			}
+		}
+		return brouwersMetLetter;
+	}
 }
