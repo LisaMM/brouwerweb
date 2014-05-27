@@ -1,7 +1,10 @@
 package be.vdab.web;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -49,6 +52,23 @@ class BrouwerController {
 		modelAndView.addObject("alfabet", alfabet);
 		modelAndView.addObject("brouwers",
 				brouwerService.findByNaam(String.valueOf(letter)));
+		return modelAndView;
+	}
+	
+	@RequestMapping(value = "opnaam", method = RequestMethod.GET)
+	public ModelAndView opNaamForm() {
+		return new ModelAndView("brouwers/opnaam", "brouwersOpNaamForm", 
+			new BrouwersOpNaamForm());
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, params="beginnaam")
+	public ModelAndView opNaam(@Valid BrouwersOpNaamForm brouwersOpNaamForm, 
+			BindingResult bindingResult) {
+		ModelAndView modelAndView = new ModelAndView("brouwers/opnaam");
+		if (! bindingResult.hasErrors()) {
+			modelAndView.addObject("brouwers", 
+					brouwerService.findByNaam(brouwersOpNaamForm.getBeginnaam()));
+		}
 		return modelAndView;
 	}
 }
