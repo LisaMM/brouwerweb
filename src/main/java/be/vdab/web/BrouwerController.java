@@ -8,6 +8,7 @@ import org.springframework.validation.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import be.vdab.entities.Brouwer;
 import be.vdab.services.BrouwerService;
 
 @Controller
@@ -31,16 +32,6 @@ class BrouwerController {
 				brouwerService.findAll());
 	}
 
-	@RequestMapping("opnaam")
-	public String opNaam() {
-		return "brouwers/opnaam";
-	}
-
-	@RequestMapping("toevoegen")
-	public String toevoegen() {
-		return "brouwers/toevoegen";
-	}
-
 	@RequestMapping(value = "opalfabet", method = RequestMethod.GET)
 	public ModelAndView opAlfabetForm() {
 		return new ModelAndView("brouwers/opalfabet", "alfabet", alfabet);
@@ -54,21 +45,41 @@ class BrouwerController {
 				brouwerService.findByNaam(String.valueOf(letter)));
 		return modelAndView;
 	}
-	
+
 	@RequestMapping(value = "opnaam", method = RequestMethod.GET)
 	public ModelAndView opNaamForm() {
-		return new ModelAndView("brouwers/opnaam", "brouwersOpNaamForm", 
-			new BrouwersOpNaamForm());
+		return new ModelAndView("brouwers/opnaam", "brouwersOpNaamForm",
+				new BrouwersOpNaamForm());
 	}
-	
-	@RequestMapping(method = RequestMethod.GET, params="beginnaam")
-	public ModelAndView opNaam(@Valid BrouwersOpNaamForm brouwersOpNaamForm, 
+
+	@RequestMapping(method = RequestMethod.GET, params = "beginnaam")
+	public ModelAndView opNaam(@Valid BrouwersOpNaamForm brouwersOpNaamForm,
 			BindingResult bindingResult) {
 		ModelAndView modelAndView = new ModelAndView("brouwers/opnaam");
-		if (! bindingResult.hasErrors()) {
-			modelAndView.addObject("brouwers", 
-					brouwerService.findByNaam(brouwersOpNaamForm.getBeginnaam()));
+		if (!bindingResult.hasErrors()) {
+			modelAndView.addObject("brouwers", brouwerService
+					.findByNaam(brouwersOpNaamForm.getBeginnaam()));
 		}
 		return modelAndView;
+	}
+
+	@RequestMapping("toevoegen")
+	public ModelAndView toevoegen() {
+		return new ModelAndView("brouwers/toevoegen", "brouwer", new Brouwer());
+	}
+
+	@RequestMapping(method = RequestMethod.POST)
+	public String toevoegen(@Valid Brouwer brouwer, BindingResult bindingResult) {
+		if (bindingResult.hasErrors()) {
+			return "brouwers/toevoegen";
+		}
+		brouwerService.create(brouwer);
+		return "redirect:/";
+	}
+
+	@InitBinder("brouwer")
+	public void initBinderBrouwer(DataBinder dataBinder) {
+		Brouwer brouwer = (Brouwer) dataBinder.getTarget();
+		brouwer.setAdres(new AdresForm());
 	}
 }
