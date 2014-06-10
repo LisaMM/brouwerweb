@@ -1,8 +1,11 @@
 package be.vdab.dao;
 
+import java.sql.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.*;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
 import be.vdab.entities.Brouwer;
@@ -10,59 +13,65 @@ import be.vdab.valueobjects.Adres;
 
 @Repository
 class BrouwerDAOImpl implements BrouwerDAO {
-	private final Map<Long, Brouwer> brouwers = new ConcurrentHashMap<>();
+	private final JdbcTemplate jdbcTemplate;
+	private final BrouwerRowMapper brouwerRowMapper = new BrouwerRowMapper();
+	private final SimpleJdbcInsert simpleJdbcInsert;
 	
-	public BrouwerDAOImpl() {
-		brouwers.put(1L, new Brouwer(1L, "Karelmans", 1000, 
-			new Adres("Keizerslaan", "11", 1000, "Brussel")));
-		brouwers.put(2L, new Brouwer(2L, "Krieke", 5050, 
-			new Adres("Gasthuisstraat", "31", 1000, "Brussel")));
-		brouwers.put(3L, new Brouwer(3L, "Hoge Maan", 3000, 
-			new Adres("Koestraat", "44", 9700, "Oudenaarde")));
-		brouwers.put(4L, new Brouwer(4L, "Achouffe", 8832,
-			new Adres("Route du Village", "32", 6666, "Achouffe-Wibrin")));
-		brouwers.put(5L, new Brouwer(5L, "Alken", 1234,
-			new Adres("StationStraat", "2", 3570, "Alken")));
-		brouwers.put(8L, new Brouwer(8L, "Bavik", 55,
-			new Adres("Rijksweg", "33", 8531, "Bavikhove")));
+	private static final String SQL_FIND_ALL =
+			"select brouwerNr, naam, omzet, straat, huisNr, postcode, gemeente" +
+			" from brouwers order by naam";
+	private static final String SQL_FIND_BY_NAAM =
+			"select brouwerNr, naam, omzet, straat, huisNr, postcode, gemeente "
+			+ "from brouwers where naam like ? order by naam";
+	private static final String SQL_FIND_AANTAL_BROUWERS =
+			"select count(*) from brouwers";
+	
+	@Autowired
+	public BrouwerDAOImpl(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+		simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+		simpleJdbcInsert.withTableName("brouwers");
+		simpleJdbcInsert.usingGeneratedKeyColumns("brouwerNr");
 	}
 
 	@Override
 	public void create(Brouwer brouwer) {
-		brouwer.setBrouwerNr(Collections.max(brouwers.keySet()) + 1);
-		brouwers.put(brouwer.getBrouwerNr(), brouwer);
+		Map<String, Object> kolomWaarden = new HashMap<>();
+		kolomWaarden.put("naam", brouwer.getNaam());
+		kolomWaarden.put("straat", brouwer.getAdres().getStraat());
+		kolomWaarden.put("huisNr", brouwer.getAdres().getHuisNr());
+		kolomWaarden.put("postcode", brouwer.getAdres().getPostcode());
+		kolomWaarden.put("gemeente", brouwer.getAdres().getGemeente());
+		kolomWaarden.put("omzet", brouwer.getOmzet());
+		Number brouwerNr = simpleJdbcInsert.executeAndReturnKey(kolomWaarden);
+		brouwer.setBrouwerNr(brouwerNr.longValue());
 	}
 
 	@Override
 	public Iterable<Brouwer> findAll() {
-		return brouwers.values();
+		return jdbcTemplate.query(SQL_FIND_ALL, brouwerRowMapper);
 	}
 
 	@Override
 	public Iterable<Brouwer> findByNaam(String beginNaam) {
-		beginNaam = beginNaam.toUpperCase();
-		List<Brouwer> brouwersMetNaam = new ArrayList<>();
-		for (Brouwer brouwer : brouwers.values()) {
-			if (brouwer.getNaam().toUpperCase().startsWith(beginNaam)) {
-				brouwersMetNaam.add(brouwer);
-			}
-		}
-		return brouwersMetNaam;
-	}
-
-	@Override
-	public Iterable<Brouwer> opAlfabet(char letter) {
-		List<Brouwer> brouwersMetLetter = new ArrayList<>();
-		for (Brouwer brouwer : brouwers.values()) {
-			if (brouwer.getNaam().charAt(0) == letter) {
-				brouwersMetLetter.add(brouwer);
-			}
-		}
-		return brouwersMetLetter;
+		return jdbcTemplate.query(SQL_FIND_BY_NAAM, brouwerRowMapper, beginNaam + "%");
 	}
 
 	@Override
 	public long findAantalBrouwers() {
-		return brouwers.size();
+		return jdbcTemplate.queryForObject(SQL_FIND_AANTAL_BROUWERS, Long.class);
+	}
+	
+	private static class BrouwerRowMapper implements RowMapper<Brouwer> {
+		@Override
+		public Brouwer mapRow(ResultSet resultSet, int rowNum) throws SQLException {
+			return new Brouwer (resultSet.getLong("brouwerNr"),
+					resultSet.getString("naam"),
+					resultSet.getInt("omzet"),
+					new Adres(resultSet.getString("straat"),
+						resultSet.getString("huisNr"),
+						resultSet.getInt("postcode"),
+						resultSet.getString("gemeente")));
+		}
 	}
 }

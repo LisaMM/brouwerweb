@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import be.vdab.entities.Brouwer;
+import be.vdab.exceptions.BrouwerMetDezeNaamBestaatAlException;
 import be.vdab.services.BrouwerService;
 
 @Controller
@@ -70,11 +71,15 @@ class BrouwerController {
 
 	@RequestMapping(method = RequestMethod.POST)
 	public String toevoegen(@Valid Brouwer brouwer, BindingResult bindingResult) {
-		if (bindingResult.hasErrors()) {
-			return "brouwers/toevoegen";
+		if (!bindingResult.hasErrors()) {
+			try {
+				brouwerService.create(brouwer);
+				return "redirect:/";
+			} catch (BrouwerMetDezeNaamBestaatAlException ex) {
+				bindingResult.rejectValue("naam", "brouwerMetDezeNaamBestaatAl");
+			}
 		}
-		brouwerService.create(brouwer);
-		return "redirect:/";
+		return "brouwers/toevoegen";
 	}
 
 	@InitBinder("brouwer")

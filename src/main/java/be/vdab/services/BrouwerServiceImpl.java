@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import be.vdab.dao.BrouwerDAO;
 import be.vdab.entities.Brouwer;
+import be.vdab.exceptions.BrouwerMetDezeNaamBestaatAlException;
 
 @Service
 public class BrouwerServiceImpl implements BrouwerService {
@@ -17,6 +18,9 @@ public class BrouwerServiceImpl implements BrouwerService {
 
 	@Override
 	public void create(Brouwer brouwer) {
+		if (brouwerDAO.findByNaam(brouwer.getNaam()) != null) {
+			throw new BrouwerMetDezeNaamBestaatAlException();
+		}
 		brouwerDAO.create(brouwer);
 	}
 
@@ -31,8 +35,8 @@ public class BrouwerServiceImpl implements BrouwerService {
 	}
 
 	@Override
-	public Iterable<Brouwer> opAlfabet(char letter) {
-		return brouwerDAO.opAlfabet(letter);
+	public Iterable<Brouwer> opAlfabet(String letter) {
+		return brouwerDAO.findByNaam(letter);
 	}
 
 	@Override
