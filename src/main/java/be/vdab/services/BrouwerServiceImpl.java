@@ -2,12 +2,14 @@ package be.vdab.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.*;
 
 import be.vdab.dao.BrouwerDAO;
 import be.vdab.entities.Brouwer;
 import be.vdab.exceptions.BrouwerMetDezeNaamBestaatAlException;
 
 @Service
+@Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
 public class BrouwerServiceImpl implements BrouwerService {
 	private final BrouwerDAO brouwerDAO;
 	
@@ -17,6 +19,7 @@ public class BrouwerServiceImpl implements BrouwerService {
 	}
 
 	@Override
+	@Transactional(readOnly = false)
 	public void create(Brouwer brouwer) {
 		if (brouwerDAO.findByNaam(brouwer.getNaam()) != null) {
 			throw new BrouwerMetDezeNaamBestaatAlException();
@@ -32,15 +35,5 @@ public class BrouwerServiceImpl implements BrouwerService {
 	@Override
 	public Iterable<Brouwer> findByNaam(String beginNaam) {
 		return brouwerDAO.findByNaam(beginNaam);
-	}
-
-	@Override
-	public Iterable<Brouwer> opAlfabet(String letter) {
-		return brouwerDAO.findByNaam(letter);
-	}
-
-	@Override
-	public long findAantalBrouwers() {
-		return brouwerDAO.findAantalBrouwers();
 	}
 }
