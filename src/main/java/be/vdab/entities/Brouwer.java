@@ -2,6 +2,7 @@ package be.vdab.entities;
 
 import java.io.Serializable;
 
+import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
 
@@ -10,8 +11,12 @@ import org.springframework.format.annotation.NumberFormat.Style;
 
 import be.vdab.valueobjects.Adres;
 
+@Entity
+@Table(name = "brouwers")
 public class Brouwer implements Serializable {
 	private static final long serialVersionUID = 1L;
+	@Id
+	@GeneratedValue
 	private long brouwerNr;
 	@NotNull
 	@Size(min = 1, max = 50, message = "{Size.tekst}")
@@ -21,6 +26,7 @@ public class Brouwer implements Serializable {
 	private Integer omzet;
 	@Valid
 	@NotNull
+	@Embedded
 	private Adres adres;
 
 	public Brouwer() {

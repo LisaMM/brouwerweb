@@ -1,10 +1,9 @@
 package be.vdab.dao;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+
 import be.vdab.entities.Brouwer;
 
-public interface BrouwerDAO {
-	void create(Brouwer brouwer);
-	Iterable<Brouwer> findAll();
-	Iterable<Brouwer> findByNaam(String beginNaam);
-	long findAantalBrouwers();
+public interface BrouwerDAO extends JpaRepository<Brouwer, Long> {
+	Iterable<Brouwer> findByNaamOrderByNaamAsc(String beginNaam);
 }
