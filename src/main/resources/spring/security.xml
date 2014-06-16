@@ -13,7 +13,7 @@
                         authentication-failure-url='/login?error=true'/>
             <intercept-url pattern='/' access='permitAll()'/>
             <intercept-url pattern="/brouwers/toevoegen" 
-                           access="hasRole(‘administrator’)" />
+                           access="hasRole(administrator)" />
             <intercept-url pattern='/**' access="isAuthenticated()"/>
 	</http>
 	<authentication-manager>
